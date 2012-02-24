@@ -1,19 +1,25 @@
 #ifndef _CHAT_CLIENT_DEBUG_WINDOW_H_
 #define _CHAT_CLIENT_DEBUG_WINDOW_H_
 
-#include <QDialog>
+#include <QWidget>
 
 class QListWidget;
 
-class DebugWindow : public QDialog
+class DebugWindow : public QWidget
 {
   Q_OBJECT
 public:
   DebugWindow(QWidget *parent= 0);
   virtual ~DebugWindow();
 
+signals:
+  void quit();
+	     
 public slots:
-  void addEvent(const QString&);
+  void trace(const QString&);
+
+protected:
+  virtual void closeEvent(QCloseEvent*);
 
 private:
   void setupUi();

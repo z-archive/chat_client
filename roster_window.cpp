@@ -3,9 +3,10 @@
 #include <QMessageBox>
 #include "roster_window.h"
 #include "roster_widget.h"
+#include "debug_window.h"
 
 RosterWindow::RosterWindow(QWidget *parent) :
-  QMainWindow(parent)
+  QWidget(parent, Qt::Window)
 {
   setupUi();
 }
@@ -18,34 +19,34 @@ void RosterWindow::setupUi()
 {
   setWindowTitle(tr("Roster"));
 
-  QWidget     *central= new QWidget(this);
-  setCentralWidget(central);
-
   QVBoxLayout *layout=  new QVBoxLayout(this);
-  central->setLayout(layout);
 
   RosterWidget *roster= new RosterWidget(this);
-  QPushButton *account= new QPushButton(tr("Account manager"));
-  QPushButton *debug=   new QPushButton(tr("Debug window"));
-
   layout->addWidget(roster);
-  layout->addWidget(account);
-  layout->addWidget(debug);
+  
+  QPushButton *account_button= new QPushButton(tr("Account manager"));  
+  layout->addWidget(account_button);
+  connect(account_button, SIGNAL(clicked()), this, SLOT(accountManager()));
 
-  connect(account, SIGNAL(clicked()), this, SLOT(accountManager()));
-  connect(debug,   SIGNAL(clicked()), this, SLOT(debugWindow()));
+  QPushButton *debug_button= new QPushButton(tr("Debug window"));
+  debug_button->setCheckable(true);
+  layout->addWidget(debug_button);
+
+  DebugWindow *debug_window= new DebugWindow;
+  connect(this, SIGNAL(trace(const QString&)), debug_window, SLOT(trace(const QString&)));
+  connect(debug_button, SIGNAL(toggled(bool)), debug_window, SLOT(setVisible(bool)));
+  connect(debug_window, SIGNAL(quit()), debug_button, SLOT(click()));
+  connect(this, SIGNAL(quit()), debug_window, SLOT(close()));
+}
+
+void RosterWindow::closeEvent(QCloseEvent* event)
+{
+  emit quit();
+  QWidget::closeEvent(event);
 }
 
 void RosterWindow::accountManager()
 {
-  QMessageBox message;
-  message.setText(tr("Account manager click"));
-  message.exec();
+  emit trace(tr("Account manager click"));
 }
 
-void RosterWindow::debugWindow()
-{
-  QMessageBox message;
-  message.setText(tr("Debug window click"));
-  message.exec();
-}
