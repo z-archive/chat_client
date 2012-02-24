@@ -1,18 +1,18 @@
-#ifndef _CHAT_CLIENT_ROSTER_WINDOW_H_
-#define _CHAT_CLIENT_ROSTER_WINDOW_H_
+#ifndef _CHAT_CLIENT_MAIN_WINDOW_H_
+#define _CHAT_CLIENT_MAIN_WINDOW_H_
 
 #include <QWidget>
 
 class QPushButton;
 class DebugWindow;
 
-class RosterWindow : public QWidget
+class MainWindow : public QWidget
 {
   Q_OBJECT
 
 public:
-  RosterWindow(QWidget *parent= 0);
-  virtual ~RosterWindow();
+  MainWindow(QWidget *parent= 0);
+  virtual ~MainWindow();
 
 signals:
   void quit();
@@ -29,4 +29,4 @@ private:
 
 };
 
-#endif /* _CHAT_CLIENT_ROSTER_WINDOW_H_ */
+#endif /* _CHAT_CLIENT_MAIN_WINDOW_H_ */

@@ -1,19 +1,19 @@
 #include <QVBoxLayout>
 #include <QListWidget>
 
-#include "roster_widget.h"
+#include "roster.h"
 
-RosterWidget::RosterWidget(QWidget *parent) :
+Roster::Roster(QWidget *parent) :
   QWidget(parent)
 {
   setupUi();
 }
 
-RosterWidget::~RosterWidget()
+Roster::~Roster()
 {
 }
 
-void RosterWidget::setupUi()
+void Roster::setupUi()
 {
   QVBoxLayout *layout= new QVBoxLayout(this);
   setLayout(layout);

@@ -4,7 +4,7 @@
 #include <QApplication>
 #include <QtGui>
 
-#include "roster_window.h"
+#include "main_window.h"
 
 int main(int argc, char* argv[])
 {
@@ -14,8 +14,8 @@ int main(int argc, char* argv[])
   Tp::enableDebug(true);
   Tp::enableWarnings(true);
 
-  RosterWindow roster;
-  roster.show();
+  MainWindow m;
+  m.show();
 
   return app.exec();
 }

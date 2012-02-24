@@ -13,8 +13,8 @@ INCLUDE_DIRECTORIES(
 )
 
 
-SET(SOURCES main.cpp roster_window.cpp roster_widget.cpp debug_window.cpp)
-SET(HEADERS roster_window.h roster_widget.h debug_window.h)
+SET(SOURCES main.cpp main_window.cpp roster.cpp debug.cpp)
+SET(HEADERS main_window.h roster.h debug.h)
 
 QT4_WRAP_CPP(HEADERS_MOC ${HEADERS})
 

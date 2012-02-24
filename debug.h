@@ -1,16 +1,16 @@
-#ifndef _CHAT_CLIENT_DEBUG_WINDOW_H_
-#define _CHAT_CLIENT_DEBUG_WINDOW_H_
+#ifndef _CHAT_CLIENT_DEBUG_H_
+#define _CHAT_CLIENT_DEBUG_H_
 
 #include <QWidget>
 
 class QListWidget;
 
-class DebugWindow : public QWidget
+class Debug : public QWidget
 {
   Q_OBJECT
 public:
-  DebugWindow(QWidget *parent= 0);
-  virtual ~DebugWindow();
+  Debug(QWidget *parent= 0);
+  virtual ~Debug();
 
 signals:
   void quit();
@@ -28,4 +28,4 @@ private:
   QListWidget *m_event_list;
 };
 
-#endif /* _CHAT_CLIENT_DEBUG_WINDOW_H_ */
+#endif /* _CHAT_CLIENT_DEBUG_H_ */
