@@ -36,10 +36,13 @@ void Main::addWindow(Window *window, QPushButton *button)
 
 void Main::setupUi()
 {
-
   Roster *roster= new Roster(this);
   
   QPushButton *account_button= new QPushButton(tr("Account manager"));  
+  account_button->setCheckable(true);
+
+  AccountManager *account_window= new AccountManager;
+  addWindow(account_window, account_button);
 
   QPushButton *debug_button= new QPushButton(tr("Debug window"));
   debug_button->setCheckable(true);
