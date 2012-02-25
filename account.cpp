@@ -4,36 +4,13 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QDataWidgetMapper>
+#include <QStandardItemModel>
 
 #include <TelepathyQt4/Types>
 #include <TelepathyQt4/Account>
 
 #include "account.h"
 #include "account_model.h"
-
-/*QTextStream& operator<<(QTextStream& stream, const Tp::Account& account)
-{
-  QString connection;
-  if (!account.connection().isNull())
-  {
-    connection= account.connection()->objectPath();
-  }
-  stream << "Valid: '"                 << account.isValidAccount()             << "'\t";
-  stream << "Enabled: '"               << account.isEnabled()                  << "'\t";
-  stream << "Connection_manager: '"    << account.cmName()                     << "'\t";
-  stream << "Protocol_name: '"         << account.protocolName()               << "'\t";
-  stream << "Display_name: '"          << account.displayName()                << "'\t";
-  stream << "Nickname: '"              << account.nickname()                   << "'\t";
-  stream << "Connect_automatically: '" << account.connectsAutomatically()      << "'\t";
-  stream << "Automatic_presence: '"    << account.automaticPresence().status() << "'\t";
-  stream << "Current_presence: '"      << account.currentPresence().status()   << "'\t";
-  stream << "Requested_presence: '"    << account.requestedPresence().status() << "'\t";
-  stream << "Changing_presence: '"     << account.isChangingPresence()         << "'\t";
-  stream << "Connection_status: '"     << account.connectionStatus()           << "'\t";
-  stream << "Connection: '"            << connection;
-  return stream;
-  }*/
-
 
 Account::Account(AccountModel *model, QWidget *parent) : QWidget(parent)
 {
@@ -46,26 +23,64 @@ Account::~Account()
 
 namespace
 {
-QWidget* create(int column)
+
+template<typename T>
+T* create(QWidget *parent, int column);
+
+template<>
+QCheckBox* create<QCheckBox>(QWidget *parent, int column)
+{
+  QCheckBox *result= new QCheckBox(parent);
+  result->setEnabled(AccountModel::editable(column));
+  return result;  
+}
+
+template<>
+QLineEdit* create<QLineEdit>(QWidget *parent, int column)
+{
+  QLineEdit *result= new QLineEdit(parent);
+  result->setEnabled(AccountModel::editable(column));
+  return result;  
+}
+
+template<>
+QSpinBox* create<QSpinBox>(QWidget *parent, int column)
+{
+  QSpinBox *result= new QSpinBox(parent);
+  result->setEnabled(AccountModel::editable(column));
+  return result;  
+}
+
+QWidget* create(QWidget *parent, int column)
 {
   switch(column)
   {
-  case AccountModel::eValid: return new QCheckBox();
-  case AccountModel::eEnabled: return new QCheckBox();
-  case AccountModel::eDisplayName: return new QLineEdit();
-  default: return 0;
-  }
+  case AccountModel::eValid:                return create<QCheckBox>(parent, column);
+  case AccountModel::eEnabled:              return create<QCheckBox>(parent, column);
+  case AccountModel::eConnectionManager:    return create<QLineEdit>(parent, column);
+  case AccountModel::eProtocolName:         return create<QLineEdit>(parent, column);
+  case AccountModel::eDisplayName:          return create<QLineEdit>(parent, column);
+  case AccountModel::eNickName:             return create<QLineEdit>(parent, column);
+  case AccountModel::eConnectAutomatically: return create<QCheckBox>(parent, column);
+  case AccountModel::eAutomaticPresence:    return create<QLineEdit>(parent, column);
+  case AccountModel::eCurrentPresence:      return create<QLineEdit>(parent, column);
+  case AccountModel::eRequestedPresence:    return create<QLineEdit>(parent, column);
+  case AccountModel::eChangingPresence:     return create<QLineEdit>(parent, column);
+  case AccountModel::eConnectionStatus:     return create<QSpinBox>(parent, column);
+  case AccountModel::eConnection:           return create<QLineEdit>(parent, column);
+  default:                                  return 0;
+  };
 }
+
 }
 
 void Account::setupUi(AccountModel *model)
 {
   m_mapper= new QDataWidgetMapper(this);
-  m_mapper->setOrientation(Qt::Vertical);
   m_mapper->setModel(model);
   for(int column= 0, column_count= model->columnCount(); column < column_count; ++column)
   {
-    QWidget* current= ::create(column);
+    QWidget* current= ::create(this, column);
     m_mapper->addMapping(current, column);
   }
   QGridLayout *layout= new QGridLayout(this);
@@ -75,11 +90,10 @@ void Account::setupUi(AccountModel *model)
     layout->addWidget(m_mapper->mappedWidgetAt(column), column, 1);
   }
   setLayout(layout);
-  m_mapper->toFirst();
 }
 
 void Account::setCurrentModelIndex(const QModelIndex &index)
 {
   qDebug() << "Account::setCurrentIndex(" << index.row() << ")";
-  m_mapper->setCurrentModelIndex(index);
+  m_mapper->setCurrentIndex(index.row());
 }
