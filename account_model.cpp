@@ -7,7 +7,7 @@
 
 #include "account_model.h"
 
-AccountModel::AccountModel(QObject *parent) : QAbstractListModel(parent)
+AccountModel::AccountModel(QObject *parent) :  QAbstractListModel(parent)
 {
   m_account_manager= Tp::AccountManager::create();
   becomeUpdate(m_account_manager->becomeReady());
@@ -15,18 +15,37 @@ AccountModel::AccountModel(QObject *parent) : QAbstractListModel(parent)
 	  this, SLOT(onNewAccount(const Tp::AccountPtr&)));
 }
 
-void AccountModel::onReady(Tp::PendingOperation *operation)
-{
-  Q_UNUSED(operation);
-  m_account_list= m_account_manager->allAccounts();
-  reset();
-}
-
 void AccountModel::onNewAccount(const Tp::AccountPtr &account)
 {
   Q_UNUSED(account);
-  m_account_list= m_account_manager->allAccounts();
+  qDebug() << "AccountModel: started adding";
+  onFinished(0);
+}
+
+void AccountModel::onFinished(Tp::PendingOperation *)
+{
+  qDebug() << "AccountModel: onFinished";
   reset();
+}
+
+void AccountModel::reset()
+{
+  qDebug() << "Acount Model: reset";
+  foreach(const Tp::AccountPtr &account, m_account_list)
+  {
+    account->disconnect();
+  }
+  m_account_list= m_account_manager->allAccounts();
+  foreach(const Tp::AccountPtr &account, m_account_list)
+  {
+    connect(account.data(), SIGNAL(stateChanged(bool)),
+	    this, SLOT(reset()));
+    connect(account.data(), SIGNAL(displayNameChanged(const QString&)),
+	    this, SLOT(reset()));
+    connect(account.data(), SIGNAL(nicknameChanged(const QString&)),
+	    this, SLOT(reset()));
+  }
+  QAbstractListModel::reset();
 }
 
 AccountModel::~AccountModel()
@@ -45,14 +64,12 @@ int AccountModel::columnCount(const QModelIndex &parent) const
   return eColumnCount;
 }
 
-bool AccountModel::becomeUpdate(Tp::PendingOperation *operation)
+void AccountModel::becomeUpdate(Tp::PendingOperation *operation)
 {
-  if (operation)
-  {
-    connect(operation, SIGNAL(finished(Tp::PendingOperation*)),
-	    this, SLOT(onReady(Tp::PendingOperation*)));    
-  }
-  return true;
+  qDebug() << "AccountMode: update started";
+  beginResetModel();
+  connect(operation, SIGNAL(finished(Tp::PendingOperation*)),
+	    this, SLOT(onFinished(Tp::PendingOperation*)));    
 }
 bool AccountModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
@@ -77,19 +94,17 @@ bool AccountModel::setData(const QModelIndex &index, const QVariant &value, int 
   }
 
   const Tp::AccountPtr &account= m_account_list.at(index.row());
-  Tp::PendingOperation *o= 0;
-
   Q_ASSERT(editable(index.column()));
 
   switch(index.column())
   {
-  case eEnabled:              o= account->setEnabled(value.toBool());       break;
-  case eDisplayName:          o= account->setDisplayName(value.toString()); break;
-  default:                    Q_ASSERT(false); return false;
+  case eEnabled:     account->setEnabled(value.toBool());       break;
+  case eDisplayName: account->setDisplayName(value.toString()); break;
+  case eNickName:    account->setNickname(value.toString());    break;
+  default:           Q_ASSERT(false); return false;
   };
 
-  Q_ASSERT(o);
-  return becomeUpdate(o);
+  return true;
 }
 
 bool AccountModel::editable(int column)
@@ -101,7 +116,7 @@ bool AccountModel::editable(int column)
   case eConnectionManager:    return false;
   case eProtocolName:         return false;
   case eDisplayName:          return true;
-  case eNickName:             return false;
+  case eNickName:             return true;
   case eConnectAutomatically: return false;
   case eAutomaticPresence:    return false;
   case eCurrentPresence:      return false;
@@ -112,6 +127,7 @@ bool AccountModel::editable(int column)
   default:                    return 0;
   }
 }
+
 QVariant AccountModel::data(const QModelIndex &index, int role) const
 {
   if (!index.isValid())

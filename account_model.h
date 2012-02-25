@@ -43,7 +43,7 @@ public:
   QVariant data(const QModelIndex &index, int role= Qt::DisplayRole) const;
   bool setData(const QModelIndex &index, const QVariant &value, int role);
 
-  bool becomeUpdate(Tp::PendingOperation *operation);
+  void becomeUpdate(Tp::PendingOperation*);
   static bool editable(int);
 
 public:
@@ -51,10 +51,13 @@ public:
 		      Qt::Orientation orientation= Qt::Horizontal,
 		      int role= Qt::DisplayRole) const;
 
+protected slots:
+  void reset();
+
 private slots:
-  void onReady(Tp::PendingOperation*);
+  void onFinished(Tp::PendingOperation*);
   void onNewAccount(const Tp::AccountPtr &account);
- 
+
 protected:
   Tp::AccountManagerPtr m_account_manager;
   QList<Tp::AccountPtr> m_account_list;

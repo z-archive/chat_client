@@ -3,6 +3,7 @@
 #include <QSpinBox>
 #include <QGridLayout>
 #include <QLabel>
+#include <QPushButton>
 #include <QDataWidgetMapper>
 #include <QStandardItemModel>
 
@@ -12,7 +13,8 @@
 #include "account.h"
 #include "account_model.h"
 
-Account::Account(AccountModel *model, QWidget *parent) : QWidget(parent)
+Account::Account(AccountModel *model, QWidget *parent) :
+  QWidget(parent)
 {
   setupUi(model);
 }
@@ -25,10 +27,10 @@ namespace
 {
 
 template<typename T>
-T* create(QWidget *parent, int column);
+T* create(Account *parent, int column);
 
 template<>
-QCheckBox* create<QCheckBox>(QWidget *parent, int column)
+QCheckBox* create<QCheckBox>(Account *parent, int column)
 {
   QCheckBox *result= new QCheckBox(parent);
   result->setEnabled(AccountModel::editable(column));
@@ -36,7 +38,7 @@ QCheckBox* create<QCheckBox>(QWidget *parent, int column)
 }
 
 template<>
-QLineEdit* create<QLineEdit>(QWidget *parent, int column)
+QLineEdit* create<QLineEdit>(Account *parent, int column)
 {
   QLineEdit *result= new QLineEdit(parent);
   result->setEnabled(AccountModel::editable(column));
@@ -44,14 +46,14 @@ QLineEdit* create<QLineEdit>(QWidget *parent, int column)
 }
 
 template<>
-QSpinBox* create<QSpinBox>(QWidget *parent, int column)
+QSpinBox* create<QSpinBox>(Account *parent, int column)
 {
   QSpinBox *result= new QSpinBox(parent);
   result->setEnabled(AccountModel::editable(column));
   return result;  
 }
 
-QWidget* create(QWidget *parent, int column)
+QWidget* create(Account *parent, int column)
 {
   switch(column)
   {
@@ -83,12 +85,14 @@ void Account::setupUi(AccountModel *model)
     QWidget* current= ::create(this, column);
     m_mapper->addMapping(current, column);
   }
-  QGridLayout *layout= new QGridLayout(this);
+  
+  QGridLayout *layout= new QGridLayout();
   for(int column= 0, column_count= model->columnCount(); column < column_count; ++column)
   {
     layout->addWidget(new QLabel(model->headerData(column).toString()), column, 0);
     layout->addWidget(m_mapper->mappedWidgetAt(column), column, 1);
   }
+
   setLayout(layout);
 }
 
