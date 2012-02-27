@@ -12,7 +12,6 @@ public:
 
 signals:
   void quit();
-  void trace(const QString&);
 	     
 protected:
   virtual void closeEvent(QCloseEvent*);

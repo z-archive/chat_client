@@ -21,13 +21,7 @@ public:
     eProtocolName,
     eDisplayName,
     eNickName,
-    eConnectAutomatically,
-    eAutomaticPresence,
-    eCurrentPresence,
-    eRequestedPresence,
-    eChangingPresence,
-    eConnectionStatus,
-    eConnection,
+    eConnectsAutomatically,
     eColumnCount
   };
 
@@ -40,25 +34,36 @@ public:
   int columnCount(const QModelIndex &parent= QModelIndex()) const;
 
 public:
-  QVariant data(const QModelIndex &index, int role= Qt::DisplayRole) const;
   bool setData(const QModelIndex &index, const QVariant &value, int role);
-
-  void becomeUpdate(Tp::PendingOperation*);
-  static bool editable(int);
+  QVariant data(const QModelIndex &index, int role= Qt::DisplayRole) const;
 
 public:
   QVariant headerData(int section,
-		      Qt::Orientation orientation= Qt::Horizontal,
-		      int role= Qt::DisplayRole) const;
+                      Qt::Orientation orientation= Qt::Horizontal,
+                      int role= Qt::DisplayRole) const;
 
-protected slots:
-  void reset();
+private:
+  /*
+    It is related to TelepathyQt4 bug: signal about
+    completed operation (change attribute) emited before
+    real attribute change.
+    As workaround I handle the signal about property changes.
+  */
+  void connect_account(const Tp::AccountPtr &account);
 
 private slots:
-  void onFinished(Tp::PendingOperation*);
-  void onNewAccount(const Tp::AccountPtr &account);
+  virtual void reset();
+  void added(const Tp::AccountPtr &account);
+  void removed();
+  void changedValid();
+  void changedEnabled();
+  void changedDisplayName();
+  void changedNickName();
+  void changedConnectsAutomatically();
 
-protected:
+private:
+  void changed(QObject* account, int column);
+private:
   Tp::AccountManagerPtr m_account_manager;
   QList<Tp::AccountPtr> m_account_list;
 };

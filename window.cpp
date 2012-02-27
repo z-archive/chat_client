@@ -1,4 +1,4 @@
-#include "debug.h"
+#include "window.h"
 
 Window::Window(const QString& title) :
   QWidget(0, Qt::Window)
